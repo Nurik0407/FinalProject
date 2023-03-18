@@ -1,6 +1,8 @@
 package peaksoft.api;
 
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.ChequeRequest;
@@ -10,6 +12,7 @@ import peaksoft.service.ChequeService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -24,6 +27,12 @@ public class ChequeAPI {
 
     public ChequeAPI(ChequeService chequeService) {
         this.chequeService = chequeService;
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("An error occurred: "+e.getMessage());
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','WAITER')")

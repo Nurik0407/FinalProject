@@ -66,7 +66,9 @@ public class StopListServiceImpl implements StopListService {
 
     @Override
     public StopListResponse findById(Long id) {
-        return stopListRepository.findStopListById(id);
+        return stopListRepository.findStopListById(id)
+                .orElseThrow(()->new NoSuchElementException(
+                        String.format("StopList with id %s not found!",id)));
     }
 
     @Override

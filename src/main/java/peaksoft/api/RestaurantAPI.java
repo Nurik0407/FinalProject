@@ -1,5 +1,7 @@
 package peaksoft.api;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.RestaurantRequest;
@@ -9,6 +11,7 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.service.RestaurantService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -25,10 +28,16 @@ public class RestaurantAPI {
         this.restaurantService = restaurantService;
     }
 
+
+    @ExceptionHandler(NoSuchElementException.class)
+    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("An error occurred: "+e.getMessage());
+    }
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
     public RestaurantResponse getById(@PathVariable Long id){
-        return restaurantService.getById(id);
+            return restaurantService.getById(id);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

@@ -338,7 +338,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public AbstractApplicationClass applications(Long id, Boolean accepted) {
 
-
         if (accepted == null && id != null) {
 
             if (userRepository.findAllByAcceptedFalse().stream().noneMatch(u -> u.getId().equals(id))) {

@@ -5,6 +5,7 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.stopList.StopListResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Zholdoshov Nuradil
@@ -16,8 +17,7 @@ public interface StopListService {
 
     List<StopListResponse> findAll();
 
-    StopListResponse findById(Long id);
-
+   StopListResponse findById(Long id);
     SimpleResponse update(Long id,StopListRequest request);
     SimpleResponse delete(Long id);
 

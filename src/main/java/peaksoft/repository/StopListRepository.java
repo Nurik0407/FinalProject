@@ -7,6 +7,7 @@ import peaksoft.entity.StopList;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface StopListRepository extends JpaRepository<StopList, Long> {
     boolean existsByMenuItem_NameAndDateAndIdNot(String name, LocalDate date, Long id);
@@ -14,5 +15,5 @@ public interface StopListRepository extends JpaRepository<StopList, Long> {
     List<StopListResponse> findAllStopList();
     boolean existsByDateAndMenuItem_Name(LocalDate date, String name);
     @Query("select new peaksoft.dto.responses.stopList.StopListResponse(s.menuItem.name,s.reason,s.date) from StopList s where s.id=:id")
-    StopListResponse findStopListById(Long id);
+    Optional<StopListResponse> findStopListById(Long id);
 }

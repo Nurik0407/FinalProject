@@ -1,5 +1,7 @@
 package peaksoft.api;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.CategoryRequest;
@@ -8,6 +10,7 @@ import peaksoft.dto.responses.category.CategoryResponse;
 import peaksoft.service.CategoryService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -21,6 +24,12 @@ public class CategoryAPI {
 
     public CategoryAPI(CategoryService categoryService) {
         this.categoryService = categoryService;
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("An error occurred: "+e.getMessage());
     }
 
     @PreAuthorize("permitAll()")

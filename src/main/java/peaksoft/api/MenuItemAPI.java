@@ -1,7 +1,8 @@
 package peaksoft.api;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.MenuItemRequest;
 import peaksoft.dto.responses.SimpleResponse;
@@ -9,9 +10,9 @@ import peaksoft.dto.responses.menuItem.MenuItemAllResponse;
 import peaksoft.dto.responses.menuItem.MenuItemResponse;
 import peaksoft.service.MenuItemService;
 
-import java.beans.SimpleBeanInfo;
 import java.util.List;
-import java.util.Objects;
+import java.util.NoSuchElementException;
+
 
 /**
  * Zholdoshov Nuradil
@@ -28,6 +29,11 @@ public class MenuItemAPI {
         this.menuItemService = menuItemService;
     }
 
+    @ExceptionHandler(NoSuchElementException.class)
+    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("An error occurred: "+e.getMessage());
+    }
     @PreAuthorize("permitAll()")
     @GetMapping
     public List<MenuItemAllResponse> findAll(@RequestParam(required = false) String global,
