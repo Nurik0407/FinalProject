@@ -26,11 +26,13 @@ public class Cheque {
 
     private LocalDate createdAt;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToMany(mappedBy = "cheques",cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     private List<MenuItem> menuItems = new ArrayList<>();
+
+
 
 }

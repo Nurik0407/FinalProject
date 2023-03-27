@@ -22,10 +22,10 @@ public class SubCategory {
 
     private String name;
 
-    @OneToMany(mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "subCategory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "category_id")
     private Category category;
 

@@ -9,13 +9,14 @@ import peaksoft.dto.responses.subCategory.SubCategoryResponse;
 import peaksoft.dto.responses.subCategory.SubCategoryResponsesByCategory;
 import peaksoft.entity.Category;
 import peaksoft.entity.SubCategory;
+import peaksoft.exceptions.AlreadyExistException;
+import peaksoft.exceptions.NotFoundException;
 import peaksoft.repository.CategoryRepository;
 import peaksoft.repository.SubCategoryRepository;
 import peaksoft.service.SubCategoryService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +40,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public List<SubCategoryResponse> findAll(Long id) {
         if (id == null) {
             return subCategoryRepository.findAllSubCategoryResponse();
-        }else {
+        } else {
             return subCategoryRepository.findAllByCategoryIdOrderByName(id);
         }
     }
@@ -49,14 +50,11 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public SimpleResponse save(SubCategoryRequest request) {
 
         if (subCategoryRepository.existsByName(request.name())) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("SubCategory with name: %s already exists!", request.name()))
-                    .build();
+            throw new AlreadyExistException(String.format("SubCategory with name: %s already exists!", request.name()));
         }
 
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Category with id: %s not found", request.categoryId())));
 
         SubCategory subCategory = SubCategory.builder()
@@ -74,7 +72,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     public SubCategoryResponse findById(Long id) {
         return subCategoryRepository.findSubCategoryResponseById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("SubCategory with id: %s not found!", id)));
     }
 
@@ -82,14 +80,11 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     public SimpleResponse update(Long id, SubCategoryRequest request) {
 
         if (subCategoryRepository.existsByNameAndIdNot(request.name(), id)) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("SubCategory with name: %s already exists", request.name()))
-                    .build();
+            throw new AlreadyExistException(String.format("SubCategory with name: %s already exists", request.name()));
         }
 
         SubCategory subCategory = subCategoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("SubCategory with id: %s not found!", id)));
 
         subCategory.setName(request.name());
@@ -103,12 +98,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public SimpleResponse delete(Long id) {
-        if (!subCategoryRepository.existsById(id)) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .message(String.format("SubCategory with id: %s not found!", id))
-                    .build();
-        }
+
+        SubCategory subCategory = subCategoryRepository.findById(id).orElseThrow(() -> new NotFoundException(
+                String.format("SubCategory with id: %s not found!", id)));
+
+        subCategory.getCategory().getSubCategories().removeIf(s -> s.getId().equals(id));
+
         subCategoryRepository.deleteById(id);
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
@@ -117,7 +112,7 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     }
 
     @Override
-    public Map<String,List<SubCategoryResponsesByCategory>> groupingByCategory() {
+    public Map<String, List<SubCategoryResponsesByCategory>> groupingByCategory() {
         List<SubCategoryResponsesByCategory> grouping = subCategoryRepository.findAllGrouping();
         return grouping.stream().collect(Collectors.groupingBy(SubCategoryResponsesByCategory::categoryName));
     }

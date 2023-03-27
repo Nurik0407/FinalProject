@@ -1,27 +1,29 @@
 package peaksoft.service.impl;
 
-import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
-import lombok.ToString;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import peaksoft.dto.requests.MenuItemRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.menuItem.MenuItemAllResponse;
 import peaksoft.dto.responses.menuItem.MenuItemResponse;
+import peaksoft.dto.responses.menuItem.PaginationResponse;
+import peaksoft.entity.Cheque;
 import peaksoft.entity.MenuItem;
 import peaksoft.entity.Restaurant;
 import peaksoft.entity.SubCategory;
+import peaksoft.exceptions.AlreadyExistException;
+import peaksoft.exceptions.NotFoundException;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.repository.SubCategoryRepository;
 import peaksoft.service.MenuItemService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 /**
  * Zholdoshov Nuradil
@@ -63,11 +65,11 @@ public class MenuItemServiceImpl implements MenuItemService {
         }
 
         Restaurant restaurant = restaurantRepository.findById(request.restaurantId())
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Restaurant with id: %s not found", request.restaurantId())));
 
         SubCategory subCategory = subCategoryRepository.findById(request.subCategoryId())
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("SubCategory with id: %s not found", request.subCategoryId())));
 
         MenuItem menuItem = MenuItem.builder()
@@ -96,7 +98,7 @@ public class MenuItemServiceImpl implements MenuItemService {
     public MenuItemResponse findById(Long id) {
 
         return menuItemRepository.findMenuItemResponseById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("MenuItem with id: %s not found!", id)));
     }
 
@@ -104,14 +106,11 @@ public class MenuItemServiceImpl implements MenuItemService {
     public SimpleResponse update(Long id, MenuItemRequest request) {
 
         if (menuItemRepository.existsByNameAndIdNot(request.name(), id)) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("MenuItem with name: %s already exists", request.name()))
-                    .build();
+            throw new AlreadyExistException(String.format("MenuItem with name: %s already exists", request.name()));
         }
 
         MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("MenuItem with id: %s not found!", id)));
         menuItem.setName(request.name());
         menuItem.setImage(request.image());
@@ -128,13 +127,18 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public SimpleResponse delete(Long id) {
-        if (!menuItemRepository.existsById(id)) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .message("MenuItem with id: " + id + " not found!")
-                    .build();
+        MenuItem menuItem = menuItemRepository.findById(id).orElseThrow(() -> new NotFoundException(
+                String.format("MenuItem with id: %s not found!", id)));
+
+        List<Cheque> cheques = menuItem.getCheques();
+        if (cheques != null) {
+            for (int i = 0; i < cheques.size(); i++) {
+                menuItem.deleteCheque(cheques.get(i));
+            }
         }
+
         menuItemRepository.deleteById(id);
+
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
                 .message(String.format("MenuItem with id: %s successfully deleted", id))
@@ -142,9 +146,6 @@ public class MenuItemServiceImpl implements MenuItemService {
     }
 
 
-    /**
-     * Dodelat
-     **/
     @Override
     public List<MenuItemAllResponse> findAll(String global, String sort, Boolean isVegan) {
 
@@ -155,5 +156,20 @@ public class MenuItemServiceImpl implements MenuItemService {
         } else {
             return findAll();
         }
+    }
+
+    @Override
+    public PaginationResponse getAllPagination(int page, int size) {
+
+        Pageable pageable
+                = PageRequest.of(page - 1, size, Sort.by("price"));
+
+        Page<MenuItemAllResponse> userPage = menuItemRepository.findAllBy(pageable);
+
+        return PaginationResponse.builder()
+                .users(userPage.getContent())
+                .currentPage(userPage.getTotalPages())
+                .pageSize(userPage.getNumber() + 1)
+                .build();
     }
 }

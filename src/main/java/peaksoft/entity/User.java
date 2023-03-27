@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},fetch = FetchType.LAZY)
     private List<Cheque> cheques;
 
     @Override
@@ -79,4 +79,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

@@ -8,7 +8,7 @@ import peaksoft.entity.Category;
 import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    @Query("select new peaksoft.dto.responses.category.CategoryResponse(c.name) from Category c")
+    @Query("select new peaksoft.dto.responses.category.CategoryResponse(c.id,c.name) from Category c")
     List<CategoryResponse> findAllCategoryResponses();
 
 

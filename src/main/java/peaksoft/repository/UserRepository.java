@@ -1,5 +1,6 @@
 package peaksoft.repository;
 
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import peaksoft.dto.responses.user.UserAllResponse;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+    boolean existsByPhoneNumberAndIdNot(String phoneNumber, Long id);
+    boolean existsByEmailAndIdNot(String email, Long id);
+    boolean existsByPhoneNumber(String phoneNumber);
 
     Boolean existsByEmail(String email);
 

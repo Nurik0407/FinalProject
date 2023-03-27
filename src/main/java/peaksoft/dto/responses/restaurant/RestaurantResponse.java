@@ -6,6 +6,7 @@ package peaksoft.dto.responses.restaurant;
  * 16.03.2023
  **/
 public record RestaurantResponse(
+        Long id,
         String name,
         String location,
         String resType,

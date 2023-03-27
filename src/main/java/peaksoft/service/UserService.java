@@ -30,4 +30,5 @@ public interface UserService {
     SimpleResponse application(UserRequest request);
 
     AbstractApplicationClass applications(Long id, Boolean accepted);
+
 }

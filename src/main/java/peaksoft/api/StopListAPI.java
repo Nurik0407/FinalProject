@@ -1,7 +1,6 @@
 package peaksoft.api;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.StopListRequest;
@@ -10,7 +9,6 @@ import peaksoft.dto.responses.stopList.StopListResponse;
 import peaksoft.service.StopListService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -27,11 +25,6 @@ public class StopListAPI {
     }
 
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: "+e.getMessage());
-    }
     @PreAuthorize("permitAll()")
     @GetMapping
     public List<StopListResponse> findAll() {
@@ -40,7 +33,7 @@ public class StopListAPI {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PostMapping
-    public SimpleResponse save(@RequestBody StopListRequest request) {
+    public SimpleResponse save(@RequestBody @Valid StopListRequest request) {
         return stopListService.save(request);
     }
 
@@ -52,7 +45,7 @@ public class StopListAPI {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id, @RequestBody StopListRequest request) {
+    public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid StopListRequest request) {
         return stopListService.update(id, request);
     }
 

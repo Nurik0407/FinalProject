@@ -1,9 +1,5 @@
 package peaksoft.dto.responses.user;
 
-import lombok.*;
-import org.springframework.http.HttpStatus;
-
-import java.util.List;
 
 /**
  * Zholdoshov Nuradil

@@ -5,6 +5,7 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.category.CategoryResponse;
 
 import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Zholdoshov Nuradil
@@ -12,6 +13,7 @@ import java.util.List;
  * 17.03.2023
  **/
 public interface CategoryService {
+
     List<CategoryResponse> findAll();
 
     CategoryResponse findById(Long id);

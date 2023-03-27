@@ -31,16 +31,13 @@ public class Restaurant {
     private Integer numberOfEmployees;
     private Integer service;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<User> users;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<MenuItem> menuItems;
 
-    public void addUser(User user) {
-        if (users == null) {
-            users = new ArrayList<>();
-        }
-        users.add(user);
+    public void deleteUser(User user) {
+       if (users != null) users.remove(user);
     }
 }

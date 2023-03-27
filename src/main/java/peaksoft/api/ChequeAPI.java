@@ -1,8 +1,6 @@
 package peaksoft.api;
 
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.ChequeRequest;
@@ -12,7 +10,6 @@ import peaksoft.service.ChequeService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -29,15 +26,10 @@ public class ChequeAPI {
         this.chequeService = chequeService;
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: "+e.getMessage());
-    }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','WAITER')")
     @PostMapping
-    public SimpleResponse save(@RequestBody ChequeRequest request){
+    public SimpleResponse save(@RequestBody @Valid ChequeRequest request){
         return  chequeService.save(request);
     }
 
@@ -49,7 +41,7 @@ public class ChequeAPI {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id,@RequestBody ChequeRequest request ){
+    public SimpleResponse update(@PathVariable Long id,@RequestBody @Valid ChequeRequest request ){
         return chequeService.update(id,request);
     }
 

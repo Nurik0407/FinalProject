@@ -1,7 +1,6 @@
 package peaksoft.api;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.RestaurantRequest;
@@ -11,7 +10,6 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.service.RestaurantService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 /**
@@ -29,11 +27,6 @@ public class RestaurantAPI {
     }
 
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: "+e.getMessage());
-    }
     @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
     public RestaurantResponse getById(@PathVariable Long id){
@@ -42,7 +35,7 @@ public class RestaurantAPI {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public SimpleResponse save(@RequestBody RestaurantRequest request){
+    public SimpleResponse save(@RequestBody @Valid RestaurantRequest request){
         return restaurantService.save(request);
     }
 
@@ -57,7 +50,7 @@ public class RestaurantAPI {
     /**  Peredelat **/
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping ("/{id}")
-    public SimpleResponse update(@PathVariable Long id,@RequestBody RestaurantRequest request){
+    public SimpleResponse update(@PathVariable Long id,@RequestBody @Valid RestaurantRequest request){
         return restaurantService.update(id, request);
     }
 

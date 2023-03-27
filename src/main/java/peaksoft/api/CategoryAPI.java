@@ -1,7 +1,6 @@
 package peaksoft.api;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.CategoryRequest;
@@ -10,7 +9,6 @@ import peaksoft.dto.responses.category.CategoryResponse;
 import peaksoft.service.CategoryService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -26,21 +24,15 @@ public class CategoryAPI {
         this.categoryService = categoryService;
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: "+e.getMessage());
-    }
-
     @PreAuthorize("permitAll()")
     @GetMapping
-    public List<CategoryResponse> findAl(){
+    public List<CategoryResponse> findAll(){
         return categoryService.findAll();
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public SimpleResponse save(@RequestBody CategoryRequest request){
+    public SimpleResponse save(@RequestBody @Valid CategoryRequest request){
         return categoryService.save(request);
     }
 
@@ -52,7 +44,7 @@ public class CategoryAPI {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id,@RequestBody CategoryRequest request){
+    public SimpleResponse update(@PathVariable Long id,@RequestBody @Valid CategoryRequest request){
         return categoryService.update(id, request);
     }
 

@@ -4,6 +4,7 @@ import peaksoft.dto.requests.MenuItemRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.menuItem.MenuItemAllResponse;
 import peaksoft.dto.responses.menuItem.MenuItemResponse;
+import peaksoft.dto.responses.menuItem.PaginationResponse;
 
 import java.util.List;
 
@@ -25,4 +26,6 @@ public interface MenuItemService {
 
 
     List<MenuItemAllResponse> findAll(String global, String sort, Boolean isVegetarian);
+
+    PaginationResponse getAllPagination(int page,int size);
 }

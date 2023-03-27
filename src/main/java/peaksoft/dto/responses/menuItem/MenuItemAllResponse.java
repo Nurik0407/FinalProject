@@ -1,6 +1,5 @@
 package peaksoft.dto.responses.menuItem;
 
-import java.math.BigDecimal;
 
 /**
  * Zholdoshov Nuradil

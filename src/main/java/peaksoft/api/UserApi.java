@@ -2,8 +2,6 @@ package peaksoft.api;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.AuthUserRequest;
@@ -13,7 +11,6 @@ import peaksoft.dto.responses.user.*;
 import peaksoft.service.UserService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -30,12 +27,6 @@ public class UserApi {
         this.userService = userService;
     }
 
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<String> handlerException(NoSuchElementException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: " + e.getMessage());
-    }
 
     /**
      * LOGIN
@@ -57,7 +48,6 @@ public class UserApi {
     public SimpleResponse saveUser(@RequestBody @Valid UserRequest request) {
 
         return userService.save(request);
-
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -67,7 +57,7 @@ public class UserApi {
     }
 
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("permitAll()")
     @PutMapping("/{id}")
     public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid UserRequest request) {
         return userService.update(id, request);
@@ -91,6 +81,7 @@ public class UserApi {
                                                  @RequestParam(required = false) Boolean accepted) {
         return userService.applications(id, accepted);
     }
+
 
 
 }

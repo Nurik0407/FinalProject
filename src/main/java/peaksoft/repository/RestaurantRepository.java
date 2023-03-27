@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-    // nujno dobavit sredniy  chek
-    @Query("select new peaksoft.dto.responses.restaurant.RestaurantResponse(r.name,r.location,r.resType,r.numberOfEmployees,r.service) from Restaurant r  where r.id=:id")
+    @Query("select new peaksoft.dto.responses.restaurant.RestaurantResponse(r.id,r.name,r.location,r.resType,r.numberOfEmployees,r.service) from Restaurant r  where r.id=:id")
    Optional<RestaurantResponse> findRestaurantResponseById(Long id);
-    @Query("select new peaksoft.dto.responses.restaurant.RestaurantAllResponse(r.name,r.location,c.priceAverage) from Restaurant r join r.users u join u.cheques c  ")
+    @Query("select new peaksoft.dto.responses.restaurant.RestaurantAllResponse(r.id,r.name,r.location,m.price) from Restaurant r join r.users u join u.cheques c join c.menuItems m ")
     List<RestaurantAllResponse> findAllRestaurantResponses();
 }

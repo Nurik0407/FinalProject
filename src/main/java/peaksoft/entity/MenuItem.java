@@ -27,7 +27,7 @@ public class MenuItem {
     private String description;
     private Boolean isVegetarian;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
@@ -38,7 +38,7 @@ public class MenuItem {
     private List<Cheque> cheques;
 
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH},fetch = FetchType.LAZY)
     private SubCategory subCategory;
 
     public void addCheque(Cheque cheque){
@@ -46,6 +46,10 @@ public class MenuItem {
             cheques = new ArrayList<>();
         }
         cheques.add(cheque);
+    }
+
+    public void deleteCheque(Cheque cheque){
+        if (cheques != null)  cheques.remove(cheque);
     }
 
 }

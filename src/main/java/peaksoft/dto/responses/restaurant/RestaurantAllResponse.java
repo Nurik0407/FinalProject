@@ -11,8 +11,9 @@ import java.math.BigDecimal;
  **/
 @Builder
 public record RestaurantAllResponse(
+        Long id,
         String name,
         String location,
-        BigDecimal averageCheck
+        Integer averageCheck
 ) {
 }

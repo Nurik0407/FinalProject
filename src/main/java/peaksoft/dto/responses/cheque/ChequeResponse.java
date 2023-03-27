@@ -3,6 +3,9 @@ package peaksoft.dto.responses.cheque;
 import lombok.Builder;
 import peaksoft.dto.responses.menuItem.MenuItemAllResponse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,10 +15,14 @@ import java.util.List;
  **/
 @Builder
 public record ChequeResponse(
+        Long id,
         String waiterFullName,
         List<MenuItemAllResponse> items,
         Integer averagePrice,
-        Integer service,
-        Integer total
+        String  service,
+        Integer total,
+        String date,
+        String message
+
 ) {
 }

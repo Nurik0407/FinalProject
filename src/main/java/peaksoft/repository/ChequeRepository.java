@@ -12,8 +12,8 @@ public interface ChequeRepository extends JpaRepository<Cheque, Long> {
 
     @Query("select sum (m.price)from User u join u.cheques c join c.menuItems m where u.id=:id and " +
             "c.createdAt = :date")
-    Integer getTopByCreatedAt(LocalDate date,Long id);
+    Integer getTopByCreatedAt(LocalDate date, Long id);
 
-@Query("select avg(m.price) from Restaurant r join r.users u join u.cheques c join c.menuItems m where r.id=1 and c.createdAt=:date")
+    @Query("select avg(m.price) from Restaurant r join r.users u join u.cheques c join c.menuItems m where r.id=1 and c.createdAt=:date")
     Integer avg(LocalDate date);
 }

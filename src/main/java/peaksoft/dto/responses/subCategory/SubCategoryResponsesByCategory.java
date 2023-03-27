@@ -1,6 +1,7 @@
 package peaksoft.dto.responses.subCategory;
 
-import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Zholdoshov Nuradil
@@ -8,7 +9,9 @@ import java.util.List;
  * 17.03.2023
  **/
 public record SubCategoryResponsesByCategory(
+        @JsonIgnore
         String categoryName,
+        Long id,
         String subCategoryName
 ) {
 }

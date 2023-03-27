@@ -8,11 +8,12 @@ import peaksoft.dto.responses.restaurant.RestaurantAllResponse;
 import peaksoft.dto.responses.restaurant.RestaurantResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Restaurant;
+import peaksoft.exceptions.NotFoundException;
+import peaksoft.repository.ChequeRepository;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.service.RestaurantService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -23,9 +24,11 @@ import java.util.NoSuchElementException;
 @Transactional
 public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepository;
+    private final ChequeRepository chequeRepository;
 
-    public RestaurantServiceImpl(RestaurantRepository restaurantRepository) {
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, ChequeRepository chequeRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.chequeRepository = chequeRepository;
     }
 
 
@@ -33,13 +36,13 @@ public class RestaurantServiceImpl implements RestaurantService {
     public RestaurantResponse getById(Long id) {
 
         Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Restaurant with id: %s not found!", id)));
         restaurant.setNumberOfEmployees(restaurant.getUsers().size());
         restaurantRepository.save(restaurant);
 
         return restaurantRepository.findRestaurantResponseById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Restaurant with id: %s not found!", id)));
     }
 
@@ -68,17 +71,16 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public SimpleResponse delete(Long id) {
-        if (!restaurantRepository.existsById(id)) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .message(String.format("Restaurant with id: %s not found!",id))
-                    .build();
-        }
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Restaurant with id: %s not found!", id)));
+
+        restaurant.getUsers().forEach(u->u.getCheques().forEach(c->chequeRepository.deleteById(c.getId())));
+
         restaurantRepository.deleteById(id);
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("Restaurant with id: %s successfully deleted",id))
+                .message(String.format("Restaurant with id: %s successfully deleted", id))
                 .build();
     }
 
@@ -86,7 +88,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public SimpleResponse update(Long id, RestaurantRequest request) {
 
         Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Restaurant with id: %s successfully updated", id)));
         restaurant.setName(request.name());
         restaurant.setLocation(request.location());
@@ -97,7 +99,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("Restaurant with id: %s successfully updated",id))
+                .message(String.format("Restaurant with id: %s successfully updated", id))
                 .build();
     }
 }

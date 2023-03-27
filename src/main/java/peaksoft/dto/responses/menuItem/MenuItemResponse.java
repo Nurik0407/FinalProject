@@ -1,6 +1,5 @@
 package peaksoft.dto.responses.menuItem;
 
-import java.math.BigDecimal;
 
 /**
  * Zholdoshov Nuradil
@@ -8,6 +7,7 @@ import java.math.BigDecimal;
  * 17.03.2023
  **/
 public record MenuItemResponse(
+        Long id,
         String name,
         String image,
         Integer price,

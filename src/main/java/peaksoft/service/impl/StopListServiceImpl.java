@@ -8,12 +8,16 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.stopList.StopListResponse;
 import peaksoft.entity.MenuItem;
 import peaksoft.entity.StopList;
+import peaksoft.exceptions.AlreadyExistException;
+import peaksoft.exceptions.BadRequestException;
+import peaksoft.exceptions.NotFoundException;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.StopListRepository;
 import peaksoft.service.StopListService;
 
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -35,15 +39,16 @@ public class StopListServiceImpl implements StopListService {
     public SimpleResponse save(StopListRequest request) {
 
         MenuItem menuItem = menuItemRepository.findById(request.menuItemId())
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("MenuItem with id: %s not found", request.menuItemId())));
 
+        if (request.date().isBefore(LocalDate.now()) && !request.date().isEqual(LocalDate.now())) {
+            throw new BadRequestException("Date must be in the future");
+        }
+
         boolean exists = stopListRepository.existsByDateAndMenuItem_Name(request.date(), menuItem.getName());
-        if (exists){
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("The MenuItem named %s has already been added to the stop list on this date",menuItem.getName()))
-                    .build();
+        if (exists) {
+            throw new AlreadyExistException(String.format("The MenuItem named %s has already been added to the stop list on this date", menuItem.getName()));
         }
 
         StopList stopList = StopList.builder()
@@ -55,7 +60,7 @@ public class StopListServiceImpl implements StopListService {
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("MenuItem named %s successfully added to stop list",menuItem.getName()))
+                .message(String.format("MenuItem named %s successfully added to stop list", menuItem.getName()))
                 .build();
     }
 
@@ -67,23 +72,20 @@ public class StopListServiceImpl implements StopListService {
     @Override
     public StopListResponse findById(Long id) {
         return stopListRepository.findStopListById(id)
-                .orElseThrow(()->new NoSuchElementException(
-                        String.format("StopList with id %s not found!",id)));
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("StopList with id %s not found!", id)));
     }
 
     @Override
     public SimpleResponse update(Long id, StopListRequest request) {
 
         StopList stopList = stopListRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("StopList with id: %s not found!")));
 
         boolean exists = stopListRepository.existsByMenuItem_NameAndDateAndIdNot(stopList.getMenuItem().getName(), request.date(), id);
-        if (exists){
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("The MenuItem named %s has already been added to the stop list on this date",stopList.getMenuItem().getName()))
-                    .build();
+        if (exists) {
+            throw new AlreadyExistException(String.format("The MenuItem named %s has already been added to the stop list on this date", stopList.getMenuItem().getName()));
         }
 
         stopList.setReason(request.reason());
@@ -92,22 +94,21 @@ public class StopListServiceImpl implements StopListService {
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("StopList with id: %s successfully updated",id))
+                .message(String.format("StopList with id: %s successfully updated", id))
                 .build();
     }
 
     @Override
     public SimpleResponse delete(Long id) {
-        if (!menuItemRepository.existsById(id)){
-            return SimpleResponse.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .message(String.format("StopList with id: %s not found",id))
-                    .build();
+        if (!stopListRepository.existsById(id)) {
+            throw new NotFoundException(
+                    String.format("StopList with id %s not found!", id));
         }
+
         stopListRepository.deleteById(id);
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("StopList with id: %s successfully deleted",id))
+                .message(String.format("StopList with id: %s successfully deleted", id))
                 .build();
     }
 }

@@ -7,11 +7,12 @@ import peaksoft.dto.requests.CategoryRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.category.CategoryResponse;
 import peaksoft.entity.Category;
+import peaksoft.exceptions.AlreadyExistException;
+import peaksoft.exceptions.NotFoundException;
 import peaksoft.repository.CategoryRepository;
 import peaksoft.service.CategoryService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Zholdoshov Nuradil
@@ -35,22 +36,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse findById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(()->new NoSuchElementException(
-                        String.format("Category with ID: %s not found",id)));
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Category with ID: %s not found", id)));
 
         return CategoryResponse.builder()
                 .name(category.getName())
+                .id(category.getId())
                 .build();
     }
 
     @Override
     public SimpleResponse save(CategoryRequest request) {
 
-        if (categoryRepository.findAll().stream().anyMatch(s->s.getName().equals(request.name()))) {
-            return SimpleResponse.builder()
-                    .status(HttpStatus.CONFLICT)
-                    .message(String.format("Category with name: %s already exists!",request.name()))
-                    .build();
+        if (categoryRepository.findAll().stream().anyMatch(s -> s.getName().equals(request.name()))) {
+            throw new AlreadyExistException(String.format("Category with name: %s already exist!", request.name()));
         }
 
         Category category = Category.builder().name(request.name()).build();
@@ -59,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("Category with name: %s successfully saved",request.name()))
+                .message(String.format("Category with name: %s successfully saved", request.name()))
                 .build();
     }
 
@@ -67,25 +66,28 @@ public class CategoryServiceImpl implements CategoryService {
     public SimpleResponse update(Long id, CategoryRequest request) {
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Category with id: %s not found!", id)));
+
+        for (Category category1 : categoryRepository.findAll()) {
+            if (category1.getName().equals(request.name()) && !category1.getId().equals(category.getId())) {
+                throw new AlreadyExistException(String.format("Category with name: %s already exist!", request.name()));
+            }
+        }
 
         category.setName(request.name());
         categoryRepository.save(category);
 
         return SimpleResponse.builder()
                 .status(HttpStatus.OK)
-                .message(String.format("Category with id: %s successfully updated",id))
+                .message(String.format("Category with id: %s successfully updated", id))
                 .build();
     }
 
     @Override
     public SimpleResponse delete(Long id) {
-        if (!categoryRepository.existsById(id)){
-            return SimpleResponse.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .message(String.format("Category with id: %s not found!", id))
-                    .build();
+        if (!categoryRepository.existsById(id)) {
+            throw new NotFoundException(String.format("Category with ID: %s not found", id));
         }
         categoryRepository.deleteById(id);
         return SimpleResponse.builder()

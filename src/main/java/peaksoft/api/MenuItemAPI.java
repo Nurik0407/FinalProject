@@ -1,17 +1,16 @@
 package peaksoft.api;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.MenuItemRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.menuItem.MenuItemAllResponse;
 import peaksoft.dto.responses.menuItem.MenuItemResponse;
+import peaksoft.dto.responses.menuItem.PaginationResponse;
 import peaksoft.service.MenuItemService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 /**
@@ -29,11 +28,7 @@ public class MenuItemAPI {
         this.menuItemService = menuItemService;
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    ResponseEntity<String> handlerExceptions(NoSuchElementException e){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("An error occurred: "+e.getMessage());
-    }
+
     @PreAuthorize("permitAll()")
     @GetMapping
     public List<MenuItemAllResponse> findAll(@RequestParam(required = false) String global,
@@ -45,7 +40,7 @@ public class MenuItemAPI {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PostMapping
-    public SimpleResponse save(@RequestBody MenuItemRequest request) {
+    public SimpleResponse save(@RequestBody @Valid MenuItemRequest request) {
         return menuItemService.save(request);
     }
 
@@ -57,7 +52,7 @@ public class MenuItemAPI {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id, @RequestBody MenuItemRequest request) {
+    public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid MenuItemRequest request) {
         return menuItemService.update(id, request);
     }
 
@@ -65,5 +60,12 @@ public class MenuItemAPI {
     @DeleteMapping("/{id}")
     public SimpleResponse delete(@PathVariable Long id) {
         return menuItemService.delete(id);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/pagination")
+    public PaginationResponse pagination(@RequestParam int page,
+                                         @RequestParam int size) {
+        return menuItemService.getAllPagination(page,size);
     }
 }
